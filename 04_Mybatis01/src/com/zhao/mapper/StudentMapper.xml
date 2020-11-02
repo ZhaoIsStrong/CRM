@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--需要在主配置文件mybatis-config.xml中进行配置 右键copy copy relative path-->
+<mapper namespace="test1">
+<!--
+sql语句必须要写在相应的标签中
+<insert>:在标签中写insert开头的sql语句，处理添加操作
+<update>:在标签中写update开头的sql语句，处理修改操作
+<delete>:在标签中写delete开头的sql语句，处理删除操作
+<select>:在标签中写select开头的sql语句，处理查询操作
+除了select其余只写id属性
+-->
+    <select id="getById" parameterType="java.lang.String" resultType="com.zhao.domain.Student">
+        select * from t_student where id=#{id}
+    </select>
+    <select id="getAll" resultType="com.zhao.domain.Student">
+        select * from t_student
+    </select>
+    <insert id="save">
+        insert into t_student(id,name,age) values(#{id},#{name},#{age})
+    </insert>
+    <update id="update">
+        update t_student set name=#{name},age = #{age} where id=#{id}
+    </update>
+    <delete id="delete">
+        delete from t_student where id=#{id}
+    </delete>
+</mapper>

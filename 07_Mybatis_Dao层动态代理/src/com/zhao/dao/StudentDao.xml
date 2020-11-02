@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--需要在主配置文件mybatis-config.xml中进行配置 右键copy copy relative path-->
+<mapper namespace="com.zhao.dao.StudentDao">
+    <!--
+    sql语句必须要写在相应的标签中
+    <insert>:在标签中写insert开头的sql语句，处理添加操作
+    <update>:在标签中写update开头的sql语句，处理修改操作
+    <delete>:在标签中写delete开头的sql语句，处理删除操作
+    <select>:在标签中写select开头的sql语句，处理查询操作
+    除了select其余只写id属性
+    -->
+<!--    主配置文件mybatis-config.xml起别名后写法1-->
+<!--    <select id="getById" parameterType="java.lang.String" resultType="stu">-->
+<!--    主配置文件mybatis-config.xml起别名后写法2-->
+<!--    <select id="getById" parameterType="java.lang.String" resultType="Student">-->
+    <select id="getById" parameterType="java.lang.String" resultType="com.zhao.domain.Student">
+        select * from t_student where id=#{id}
+    </select>
+
+    <select id="getById2" parameterType="java.lang.String" resultType="com.zhao.domain.Student">
+        select * from t_student where id=#{id} and name=#{name}
+    </select>
+    <select id="selectMap" parameterType="java.util.Map" resultType="com.zhao.domain.Student">
+        select * from t_student where id=#{id} and name=#{name}
+    </select>
+
+    <select id="getAll" parameterType="java.lang.String" resultType="com.zhao.domain.Student">
+        select * from t_student
+    </select>
+    <update id="update">
+        update t_student set name=#{name},age=#{age} where id=#{id}
+    </update>
+    <delete id="delete">
+        delete from t_student where id=#{id}
+    </delete>
+    <insert id="save">
+        insert into t_student(id,name,age) values(#{id},#{name},#{age})
+    </insert>
+
+
+
+<!--模糊查询-->
+    <select id="selectMap" parameterType="java.util.Map" resultType="com.zhao.domain.Student">
+--         select * from t_student where name like '%${value}%'
+-- 注意like 加空格
+        select * from t_student where name like '%' #{value} '%'
+    </select>
+
+
+
+                        <!--
+                            返回值类型
+                        -->
+
+    <select id="selectMap" resultType="String">
+-- 返回String类型
+        select name from t_student where id=#{id}
+    </select>
+    <select id="selectMap" resultType="int">
+-- 返回int类型
+        select count(*) from t_student
+    </select>
+
+
+
+<!--    测试resultType当数据库表字段名称和domain类属性名称不一致时的处理-->
+    <select id="selectMap" resultType="int">
+        -- 方式1：起别名
+        select id,fullname as name,age from t_student
+
+    </select>
+    <!--  方式2：id：resultMap标签对的唯一标识，在使用到该resultMap标签的时候，使用id来找到这组标签
+                 type：指定一个类型，与数据库表一一对应，建立起表字段和类属性的名字一一匹配的关系-->
+    <resultMap id="stuMap" type="Student">
+        <id property="id" column="id"/>
+        <result property="name" column="fullname"/>
+        <result property="age" column="age"/>
+    </resultMap>
+    <select id="selectMap" resultMap="stuMap">
+        -- 方式1：起别名
+        select id,fullname,age from t_student
+
+    </select>
+
+
+<!--    动态sql-->
+    <select id="selectMap" resultType="Student">
+        -- 方式1：起别名
+        select * from t_student
+
+        <where>
+            <if test="name!=null and name!=''">
+--             加上and也没关系
+                name like '%' #{name} '%'
+            </if>
+            <if test="address!=null and address!=''">
+                and address like '%' #{name} '%'
+            </if>
+        </where>
+    </select>
+<!--for each-->
+
+
+    <select id="selectMap" resultType="Student">
+        -- 方式1：起别名
+        select * from t_student-- where name in ('3','2','1')
+        where id in
+-- for each 用来遍历传递来的数组参数
+-- collection 标识传递参数的类型
+-- item每次遍历出来的二元素，在使用该元素的时候，需要套用在#｛｝中
+--open拼接循坏的开始符号
+--close拼接循坏的结束符号
+--separator 元素与元素之间的分隔符
+--传入参数String arr[]={"1","1","1"}
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+
+    </select>
+
+
+<!--    sql片段-->
+    <sql id="sql1">
+        select * from t_student
+    </sql>
+
+    <select id="selectMap" resultMap="stuMap">
+        <include refid="sql1"/> where id= #{id}
+
+    </select>
+
+<!--    List<Map<String,Object>> mapList = ss.getAll();-->
+<!--    for(Map<String,Object> map:mapList){-->
+<!--    Set<String> set1 = map.keySet();-->
+<!--    for(String key:set1){-->
+<!--    System.out.println(key);-->
+<!--    System.out.println(map.get(key));-->
+<!--    }-->
+<!--    }-->
+    <select id="selectMap" resultType="map">
+        select s.name as sname,c.name as cname
+        from table_1 s
+        join classroom c
+        on c.id=s.id;
+
+    </select>
+
+
+            <!--VO-->
+<!--    List<StudentAndClassroomVo> studentAndClassroomVos = ss.getAll();-->
+<!--    for(StudentAndClassroomVo map1:studentAndClassroomVos){-->
+<!--    System.out.println(map1.toString());-->
+<!--    }-->
+    <select id="selectMap" resultType="com.zhao.vo.StudentAndClassroomVo">
+        select
+        s.id sid,
+        s.name sname,
+        s.age sage,
+        s.address saddress,
+        c.id cid,
+        c.name cname
+        from table_1 s
+        join classroom c
+        on c.id=s.id;
+
+
+        --学生表名字带z的 或者同时班级表带z
+         where s.name like '%' #{name} '%' and c.name like '%' #{name} '%'
+    </select>
+
+
+</mapper>
